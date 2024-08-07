@@ -1,1 +1,1 @@
-To jest super aplikacja, która korzysta z drizzle.
+To jest super aplikacja, która korzysta z drizzle!
