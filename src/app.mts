@@ -1,14 +1,31 @@
-import { integer, pgTable, serial, text, varchar } from "drizzle-orm/pg-core";
+import { initTRPC } from '@trpc/server';
 import { drizzle } from "drizzle-orm/node-postgres";
 import pg from 'pg';
-import {Request, Response} from 'express';
-
-export const accounts = pgTable('accounts', {
-  user_id: serial('user_id').primaryKey(),
-  username: text('username').unique().notNull()
-});
+import { Request, Response } from 'express';
+import { z } from 'zod';
+import * as trpcExpress from '@trpc/server/adapters/express';
+import { appRouter, createContext } from './trpc.js';
 
 const express = require('express');
+const app = express();
+
+
+app.use(
+  '/trpc',
+  trpcExpress.createExpressMiddleware({
+    router: appRouter,
+    createContext,
+  })
+);
+app.listen(8000);
+
+// export const accounts = pgTable('accounts', {
+//   user_id: serial('user_id').primaryKey(),
+//   username: text('username').unique().notNull()
+// });
+
+
+
 // or
 const client = new pg.Client({
   host: "127.0.0.1",
@@ -20,17 +37,3 @@ const client = new pg.Client({
 console.log("das")
 await client.connect();
 const db = drizzle(client);
-
-const app = express();
-const port = process.env.PORT || 3000;
-
-app.get('/', (req: Request, res: Response) => {
-  const result = db.select().from(accounts);
-  result.then((response)=>{
-    res.send(response)
-  })
-});
-
-app.listen(port, () => {
-  console.log(`[server]: Server is running at http://localhost:${port}`);
-});
